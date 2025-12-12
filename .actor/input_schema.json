@@ -3,17 +3,26 @@
   "type": "object",
   "schemaVersion": 1,
   "properties": {
+    "uploadedImages": {
+      "title": "Upload Images",
+      "type": "array",
+      "description": "Upload images directly from your computer. Each uploaded file will be processed.",
+      "editor": "keyValueRecordKeys",
+      "patternKey": "uploaded-image-",
+      "patternValue": "",
+      "sectionCaption": "Direct Image Upload",
+      "sectionDescription": "Upload images directly from your device for processing."
+    },
     "images": {
-      "title": "Image Sources",
+      "title": "Image URLs",
       "type": "array",
       "description": "Array of image sources. Each can be an HTTP(S) URL or a key-value store reference in format: key-value://{storeId}/{key}",
       "editor": "stringList",
       "items": {
         "type": "string"
       },
-      "prefill": [
-        "https://example.com/sample-image.jpg"
-      ]
+      "sectionCaption": "URL Sources",
+      "sectionDescription": "Alternatively, provide URLs to images you want to process."
     },
     "width": {
       "title": "Target Width",
@@ -22,7 +31,9 @@
       "editor": "number",
       "minimum": 1,
       "maximum": 10000,
-      "nullable": true
+      "nullable": true,
+      "sectionCaption": "Image Dimensions",
+      "sectionDescription": "Configure the output size of your processed images."
     },
     "height": {
       "title": "Target Height",
@@ -39,8 +50,20 @@
       "description": "How the image should be resized to fit the target dimensions. Cover: crop to fill. Contain: letterbox to fit. Inside: resize within bounds. Outside: resize to cover bounds. Fill: stretch to exact dimensions.",
       "editor": "select",
       "default": "cover",
-      "enum": ["cover", "contain", "inside", "outside", "fill"],
-      "enumTitles": ["Cover (crop to fill)", "Contain (letterbox)", "Inside (within bounds)", "Outside (cover bounds)", "Fill (stretch)"]
+      "enum": [
+        "cover",
+        "contain",
+        "inside",
+        "outside",
+        "fill"
+      ],
+      "enumTitles": [
+        "Cover (crop to fill)",
+        "Contain (letterbox)",
+        "Inside (within bounds)",
+        "Outside (cover bounds)",
+        "Fill (stretch)"
+      ]
     },
     "position": {
       "title": "Crop Position",
@@ -48,8 +71,28 @@
       "description": "Position for smart cropping when using cover or contain fit modes.",
       "editor": "select",
       "default": "center",
-      "enum": ["center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right"],
-      "enumTitles": ["Center", "Top", "Bottom", "Left", "Right", "Top Left", "Top Right", "Bottom Left", "Bottom Right"]
+      "enum": [
+        "center",
+        "top",
+        "bottom",
+        "left",
+        "right",
+        "top-left",
+        "top-right",
+        "bottom-left",
+        "bottom-right"
+      ],
+      "enumTitles": [
+        "Center",
+        "Top",
+        "Bottom",
+        "Left",
+        "Right",
+        "Top Left",
+        "Top Right",
+        "Bottom Left",
+        "Bottom Right"
+      ]
     },
     "format": {
       "title": "Output Format",
@@ -57,8 +100,24 @@
       "description": "Target image format. Select 'original' to keep the source format.",
       "editor": "select",
       "default": "webp",
-      "enum": ["jpeg", "png", "webp", "avif", "gif", "original"],
-      "enumTitles": ["JPEG", "PNG", "WebP", "AVIF", "GIF", "Original"]
+      "enum": [
+        "jpeg",
+        "png",
+        "webp",
+        "avif",
+        "gif",
+        "original"
+      ],
+      "enumTitles": [
+        "JPEG",
+        "PNG",
+        "WebP",
+        "AVIF",
+        "GIF",
+        "Original"
+      ],
+      "sectionCaption": "Format & Quality",
+      "sectionDescription": "Configure the output format and compression settings."
     },
     "quality": {
       "title": "Quality",
@@ -90,7 +149,9 @@
       "editor": "number",
       "default": 5,
       "minimum": 1,
-      "maximum": 20
+      "maximum": 20,
+      "sectionCaption": "Processing Options",
+      "sectionDescription": "Advanced processing configuration."
     },
     "outputStoreId": {
       "title": "Output Key-Value Store ID",
@@ -107,5 +168,5 @@
       "default": true
     }
   },
-  "required": ["images"]
+  "required": []
 }

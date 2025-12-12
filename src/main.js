@@ -183,6 +183,7 @@ Actor.main(async () => {
 
     // Destructure input with defaults
     const {
+        uploadedImages = [],
         images = [],
         width = null,
         height = null,
@@ -197,12 +198,36 @@ Actor.main(async () => {
         createDataset = true,
     } = input;
 
-    // Validate images array
-    if (!Array.isArray(images) || images.length === 0) {
-        throw new Error('Input field "images" must be a non-empty array of image sources');
+    // Get the default key-value store for uploaded images
+    const defaultStore = await Actor.openKeyValueStore();
+
+    // Collect all image sources
+    const allImageSources = [];
+
+    // Process uploaded images from the default key-value store
+    if (Array.isArray(uploadedImages) && uploadedImages.length > 0) {
+        log.info(`Found ${uploadedImages.length} uploaded images`);
+        for (const key of uploadedImages) {
+            // Uploaded images are stored in the default key-value store with the provided key
+            allImageSources.push({ type: 'uploaded', key, source: `uploaded:${key}` });
+        }
     }
 
-    log.info(`Starting image processing for ${images.length} images`);
+    // Add URL sources
+    if (Array.isArray(images)) {
+        for (const url of images) {
+            if (url && typeof url === 'string') {
+                allImageSources.push({ type: 'url', source: url });
+            }
+        }
+    }
+
+    // Validate that we have at least one image to process
+    if (allImageSources.length === 0) {
+        throw new Error('No images provided. Please upload images or provide image URLs.');
+    }
+
+    log.info(`Starting image processing for ${allImageSources.length} images`);
     log.info(`Settings: width=${width}, height=${height}, fit=${fit}, format=${format}, quality=${quality}`);
 
     // Initialize storages
@@ -231,12 +256,32 @@ Actor.main(async () => {
     };
 
     // Process images with concurrency control
-    const processImage = async (source, index) => {
+    const processImage = async (imageSource, index) => {
+        const { type, source, key: uploadedKey } = imageSource;
         try {
-            log.info(`Processing image ${index + 1}/${images.length}: ${source}`);
+            log.info(`Processing image ${index + 1}/${allImageSources.length}: ${source}`);
 
-            // Step 1: Resolve image buffer from source
-            const inputBuffer = await resolveImageBuffer(source, headerGenerator);
+            let inputBuffer;
+
+            // Handle uploaded images from default key-value store
+            if (type === 'uploaded') {
+                const value = await defaultStore.getValue(uploadedKey);
+                if (!value) {
+                    throw new Error(`Uploaded image not found: ${uploadedKey}`);
+                }
+                if (Buffer.isBuffer(value)) {
+                    inputBuffer = value;
+                } else if (typeof value === 'string') {
+                    inputBuffer = Buffer.from(value, 'binary');
+                } else if (value instanceof ArrayBuffer) {
+                    inputBuffer = Buffer.from(value);
+                } else {
+                    throw new Error('Uploaded file is not a valid image buffer');
+                }
+            } else {
+                // Handle URL sources
+                inputBuffer = await resolveImageBuffer(source, headerGenerator);
+            }
 
             // Step 2: Process image
             const { buffer, info } = await processWithSharp(inputBuffer, {
@@ -251,22 +296,22 @@ Actor.main(async () => {
             });
 
             // Step 3: Generate unique key for storage
-            const key = `image_${index}_${Date.now()}`;
+            const outputKey = `image_${index}_${Date.now()}`;
 
             // Step 4: Determine content type
             const contentType = getContentType(info.format);
 
             // Step 5: Save to key-value store
-            await store.setValue(key, buffer, { contentType });
+            await store.setValue(outputKey, buffer, { contentType });
 
             // Step 6: Get public URL
-            const url = store.getPublicUrl(key);
+            const url = store.getPublicUrl(outputKey);
 
             // Step 7: Build result object
             const result = {
                 index,
                 source,
-                key,
+                key: outputKey,
                 url,
                 width: info.width,
                 height: info.height,
@@ -307,19 +352,19 @@ Actor.main(async () => {
 
     // Process images with concurrency control using Promise.all with chunking
     const maxConcurrency = Math.min(Math.max(1, concurrency), 20);
-    for (let i = 0; i < images.length; i += maxConcurrency) {
-        const chunk = images.slice(i, i + maxConcurrency);
-        await Promise.all(chunk.map((source, j) => processImage(source, i + j)));
+    for (let i = 0; i < allImageSources.length; i += maxConcurrency) {
+        const chunk = allImageSources.slice(i, i + maxConcurrency);
+        await Promise.all(chunk.map((imageSource, j) => processImage(imageSource, i + j)));
     }
 
     // Compute summary
     const summary = {
-        total: images.length,
+        total: allImageSources.length,
         succeeded,
         failed,
     };
 
-    log.info(`Processing complete: ${succeeded} succeeded, ${failed} failed out of ${images.length} total`);
+    log.info(`Processing complete: ${succeeded} succeeded, ${failed} failed out of ${allImageSources.length} total`);
 
     // Save final output to OUTPUT key
     const output = {
