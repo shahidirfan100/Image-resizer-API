@@ -1,6 +1,7 @@
 {
   "title": "Image Processing Result",
   "type": "object",
+  "actorSpecification": 1,
   "schemaVersion": 1,
   "properties": {
     "index": {
