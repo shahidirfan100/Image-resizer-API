@@ -39,20 +39,8 @@
       "description": "How the image should be resized to fit the target dimensions. Cover: crop to fill. Contain: letterbox to fit. Inside: resize within bounds. Outside: resize to cover bounds. Fill: stretch to exact dimensions.",
       "editor": "select",
       "default": "cover",
-      "enum": [
-        "cover",
-        "contain",
-        "inside",
-        "outside",
-        "fill"
-      ],
-      "enumTitles": [
-        "Cover (crop to fill)",
-        "Contain (letterbox)",
-        "Inside (within bounds)",
-        "Outside (cover bounds)",
-        "Fill (stretch)"
-      ]
+      "enum": ["cover", "contain", "inside", "outside", "fill"],
+      "enumTitles": ["Cover (crop to fill)", "Contain (letterbox)", "Inside (within bounds)", "Outside (cover bounds)", "Fill (stretch)"]
     },
     "position": {
       "title": "Crop Position",
@@ -60,28 +48,8 @@
       "description": "Position for smart cropping when using cover or contain fit modes.",
       "editor": "select",
       "default": "center",
-      "enum": [
-        "center",
-        "top",
-        "bottom",
-        "left",
-        "right",
-        "top-left",
-        "top-right",
-        "bottom-left",
-        "bottom-right"
-      ],
-      "enumTitles": [
-        "Center",
-        "Top",
-        "Bottom",
-        "Left",
-        "Right",
-        "Top Left",
-        "Top Right",
-        "Bottom Left",
-        "Bottom Right"
-      ]
+      "enum": ["center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right"],
+      "enumTitles": ["Center", "Top", "Bottom", "Left", "Right", "Top Left", "Top Right", "Bottom Left", "Bottom Right"]
     },
     "format": {
       "title": "Output Format",
@@ -89,22 +57,8 @@
       "description": "Target image format. Select 'original' to keep the source format.",
       "editor": "select",
       "default": "webp",
-      "enum": [
-        "jpeg",
-        "png",
-        "webp",
-        "avif",
-        "gif",
-        "original"
-      ],
-      "enumTitles": [
-        "JPEG",
-        "PNG",
-        "WebP",
-        "AVIF",
-        "GIF",
-        "Original"
-      ]
+      "enum": ["jpeg", "png", "webp", "avif", "gif", "original"],
+      "enumTitles": ["JPEG", "PNG", "WebP", "AVIF", "GIF", "Original"]
     },
     "quality": {
       "title": "Quality",
@@ -153,7 +107,5 @@
       "default": true
     }
   },
-  "required": [
-    "images"
-  ]
+  "required": ["images"]
 }
