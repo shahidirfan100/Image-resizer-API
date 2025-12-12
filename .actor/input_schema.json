@@ -1,0 +1,111 @@
+{
+  "title": "Image Resizer API Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "images": {
+      "title": "Image Sources",
+      "type": "array",
+      "description": "Array of image sources. Each can be an HTTP(S) URL or a key-value store reference in format: key-value://{storeId}/{key}",
+      "editor": "stringList",
+      "items": {
+        "type": "string"
+      },
+      "prefill": [
+        "https://example.com/sample-image.jpg"
+      ]
+    },
+    "width": {
+      "title": "Target Width",
+      "type": "integer",
+      "description": "Target width in pixels. If not specified, width is determined automatically.",
+      "editor": "number",
+      "minimum": 1,
+      "maximum": 10000,
+      "nullable": true
+    },
+    "height": {
+      "title": "Target Height",
+      "type": "integer",
+      "description": "Target height in pixels. If not specified, height is determined automatically.",
+      "editor": "number",
+      "minimum": 1,
+      "maximum": 10000,
+      "nullable": true
+    },
+    "fit": {
+      "title": "Fit Mode",
+      "type": "string",
+      "description": "How the image should be resized to fit the target dimensions. Cover: crop to fill. Contain: letterbox to fit. Inside: resize within bounds. Outside: resize to cover bounds. Fill: stretch to exact dimensions.",
+      "editor": "select",
+      "default": "cover",
+      "enum": ["cover", "contain", "inside", "outside", "fill"],
+      "enumTitles": ["Cover (crop to fill)", "Contain (letterbox)", "Inside (within bounds)", "Outside (cover bounds)", "Fill (stretch)"]
+    },
+    "position": {
+      "title": "Crop Position",
+      "type": "string",
+      "description": "Position for smart cropping when using cover or contain fit modes.",
+      "editor": "select",
+      "default": "center",
+      "enum": ["center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right"],
+      "enumTitles": ["Center", "Top", "Bottom", "Left", "Right", "Top Left", "Top Right", "Bottom Left", "Bottom Right"]
+    },
+    "format": {
+      "title": "Output Format",
+      "type": "string",
+      "description": "Target image format. Select 'original' to keep the source format.",
+      "editor": "select",
+      "default": "webp",
+      "enum": ["jpeg", "png", "webp", "avif", "gif", "original"],
+      "enumTitles": ["JPEG", "PNG", "WebP", "AVIF", "GIF", "Original"]
+    },
+    "quality": {
+      "title": "Quality",
+      "type": "integer",
+      "description": "Quality setting for lossy formats (JPEG, WebP, AVIF). Higher values produce better quality but larger files.",
+      "editor": "number",
+      "default": 80,
+      "minimum": 1,
+      "maximum": 100
+    },
+    "background": {
+      "title": "Background Color",
+      "type": "string",
+      "description": "Background color for padding when using contain or fill modes. Supports hex colors (e.g., #ffffff) or CSS color names.",
+      "editor": "textfield",
+      "default": "#ffffff"
+    },
+    "stripMetadata": {
+      "title": "Strip Metadata",
+      "type": "boolean",
+      "description": "Remove EXIF and other metadata from images to reduce file size.",
+      "editor": "checkbox",
+      "default": true
+    },
+    "concurrency": {
+      "title": "Concurrency",
+      "type": "integer",
+      "description": "Maximum number of images to process in parallel.",
+      "editor": "number",
+      "default": 5,
+      "minimum": 1,
+      "maximum": 20
+    },
+    "outputStoreId": {
+      "title": "Output Key-Value Store ID",
+      "type": "string",
+      "description": "ID of the key-value store where processed images will be saved. Leave empty to use the default store.",
+      "editor": "textfield",
+      "nullable": true
+    },
+    "createDataset": {
+      "title": "Create Dataset Records",
+      "type": "boolean",
+      "description": "When enabled, creates a dataset record for each processed image with metadata and public URLs.",
+      "editor": "checkbox",
+      "default": true
+    }
+  },
+  "required": ["images"]
+}

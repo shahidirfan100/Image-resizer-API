@@ -1,0 +1,79 @@
+{
+  "title": "Image Resizer API Output",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "results": {
+      "title": "Results",
+      "type": "array",
+      "description": "Array of processing results for each input image",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "description": "Index of the image in the input array"
+          },
+          "source": {
+            "type": "string",
+            "description": "Original input string (URL or key-value reference)"
+          },
+          "key": {
+            "type": "string",
+            "description": "Key used to store the processed image",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "description": "Public URL of the processed image",
+            "nullable": true
+          },
+          "width": {
+            "type": "integer",
+            "description": "Final width in pixels",
+            "nullable": true
+          },
+          "height": {
+            "type": "integer",
+            "description": "Final height in pixels",
+            "nullable": true
+          },
+          "format": {
+            "type": "string",
+            "description": "Final output format",
+            "nullable": true
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "description": "Size in bytes",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if processing failed",
+            "nullable": true
+          }
+        }
+      }
+    },
+    "summary": {
+      "title": "Summary",
+      "type": "object",
+      "description": "Summary statistics of the processing run",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "description": "Total number of input images"
+        },
+        "succeeded": {
+          "type": "integer",
+          "description": "Number of successfully processed images"
+        },
+        "failed": {
+          "type": "integer",
+          "description": "Number of failed images"
+        }
+      }
+    }
+  }
+}

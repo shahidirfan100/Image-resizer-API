@@ -1,0 +1,17 @@
+{
+  "images": [
+    "https://example.com/image1.jpg",
+    "https://example.com/image2.png",
+    "key-value://some-store-id/some-key"
+  ],
+  "width": 1200,
+  "height": 1200,
+  "fit": "cover",
+  "position": "center",
+  "format": "webp",
+  "quality": 80,
+  "background": "#ffffff",
+  "stripMetadata": true,
+  "concurrency": 3,
+  "createDataset": true
+}

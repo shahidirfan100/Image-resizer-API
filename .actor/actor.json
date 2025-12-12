@@ -1,0 +1,18 @@
+{
+  "actorSpecification": 1,
+  "name": "image-resizer-api",
+  "title": "Image Resizer API",
+  "version": "0.0.1",
+  "description": "Batch processes images from URLs or Apify storages. Resizes, crops, and converts image formats (JPEG, PNG, WebP, AVIF, GIF) with customizable compression. Applies smart cropping via fit and position while preserving aspect ratio. Outputs optimized images via public URLs and structured dataset records.",
+  "categories": ["TOOLS"],
+  "defaultRunOptions": {
+    "build": "latest",
+    "memoryMbytes": 4096,
+    "timeoutSecs": 3600
+  },
+  "readme": "../README.md",
+  "input": "./input_schema.json",
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  }
+}

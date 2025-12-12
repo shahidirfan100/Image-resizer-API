@@ -1,0 +1,17 @@
+{
+  "name": "image-resizer-api",
+  "version": "0.0.1",
+  "description": "Batch processes images from URLs or Apify storages. Resizes, crops, and converts image formats (JPEG, PNG, WebP, AVIF, GIF) with customizable compression.",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node ./src/main.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "apify": "^3.4.5",
+    "sharp": "^0.33.0",
+    "got-scraping": "^4.1.2",
+    "header-generator": "^2.1.27"
+  }
+}
