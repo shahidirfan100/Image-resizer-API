@@ -206,7 +206,7 @@ Actor.main(async () => {
     log.info(`Settings: width=${width}, height=${height}, fit=${fit}, format=${format}, quality=${quality}`);
 
     // Initialize storages
-    const store = await Actor.openKeyValueStore(outputStoreId);
+    const store = await Actor.openKeyValueStore(outputStoreId || undefined);
     const dataset = createDataset ? await Actor.openDataset() : null;
 
     // Initialize header generator for HTTP requests
