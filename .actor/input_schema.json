@@ -7,9 +7,7 @@
       "title": "Upload Images",
       "type": "array",
       "description": "Upload images directly from your computer. Each uploaded file will be processed.",
-      "editor": "keyValueRecordKeys",
-      "patternKey": "uploaded-image-",
-      "patternValue": "",
+      "editor": "fileUpload",
       "sectionCaption": "Direct Image Upload",
       "sectionDescription": "Upload images directly from your device for processing."
     },

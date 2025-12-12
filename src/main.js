@@ -205,11 +205,18 @@ Actor.main(async () => {
     const allImageSources = [];
 
     // Process uploaded images from the default key-value store
+    // fileUpload editor returns array of file objects with properties like: { name, contentType }
+    // The file content is stored in the default key-value store with the name as the key
     if (Array.isArray(uploadedImages) && uploadedImages.length > 0) {
         log.info(`Found ${uploadedImages.length} uploaded images`);
-        for (const key of uploadedImages) {
-            // Uploaded images are stored in the default key-value store with the provided key
-            allImageSources.push({ type: 'uploaded', key, source: `uploaded:${key}` });
+        for (const file of uploadedImages) {
+            // Handle both object format and string format
+            if (typeof file === 'object' && file !== null) {
+                const key = file.name || file.key || file;
+                allImageSources.push({ type: 'uploaded', key, source: `uploaded:${key}` });
+            } else if (typeof file === 'string') {
+                allImageSources.push({ type: 'uploaded', key: file, source: `uploaded:${file}` });
+            }
         }
     }
 
