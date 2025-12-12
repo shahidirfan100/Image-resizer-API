@@ -1,4 +1,4 @@
-import Apify from 'apify';
+import { Actor, log } from 'apify';
 import sharp from 'sharp';
 import { gotScraping } from 'got-scraping';
 import { HeaderGenerator } from 'header-generator';
@@ -61,7 +61,7 @@ async function resolveImageBuffer(source, headerGenerator) {
                 throw new Error('Both storeId and key must be non-empty');
             }
 
-            const store = await Apify.openKeyValueStore(storeId);
+            const store = await Actor.openKeyValueStore(storeId);
             const value = await store.getValue(key);
 
             if (!value) {
@@ -177,9 +177,9 @@ async function processWithSharp(buffer, options) {
  * Batch processes images from URLs or Apify storages with customizable resizing,
  * cropping, format conversion, and compression.
  */
-Apify.main(async () => {
+Actor.main(async () => {
     // Get input
-    const input = await Apify.getInput() || {};
+    const input = await Actor.getInput() || {};
 
     // Destructure input with defaults
     const {
@@ -202,12 +202,12 @@ Apify.main(async () => {
         throw new Error('Input field "images" must be a non-empty array of image sources');
     }
 
-    Apify.utils.log.info(`Starting image processing for ${images.length} images`);
-    Apify.utils.log.info(`Settings: width=${width}, height=${height}, fit=${fit}, format=${format}, quality=${quality}`);
+    log.info(`Starting image processing for ${images.length} images`);
+    log.info(`Settings: width=${width}, height=${height}, fit=${fit}, format=${format}, quality=${quality}`);
 
     // Initialize storages
-    const store = await Apify.openKeyValueStore(outputStoreId);
-    const dataset = createDataset ? await Apify.openDataset() : null;
+    const store = await Actor.openKeyValueStore(outputStoreId);
+    const dataset = createDataset ? await Actor.openDataset() : null;
 
     // Initialize header generator for HTTP requests
     const headerGenerator = new HeaderGenerator();
@@ -231,83 +231,86 @@ Apify.main(async () => {
     };
 
     // Process images with concurrency control
-    await Apify.utils.createPromisePool({
-        maxConcurrency: Math.min(Math.max(1, concurrency), 20),
-        taskFn: async (source, index) => {
-            try {
-                Apify.utils.log.info(`Processing image ${index + 1}/${images.length}: ${source}`);
+    const processImage = async (source, index) => {
+        try {
+            log.info(`Processing image ${index + 1}/${images.length}: ${source}`);
 
-                // Step 1: Resolve image buffer from source
-                const inputBuffer = await resolveImageBuffer(source, headerGenerator);
+            // Step 1: Resolve image buffer from source
+            const inputBuffer = await resolveImageBuffer(source, headerGenerator);
 
-                // Step 2: Process image
-                const { buffer, info } = await processWithSharp(inputBuffer, {
-                    width,
-                    height,
-                    fit,
-                    position,
-                    format,
-                    quality,
-                    background,
-                    stripMetadata,
-                });
+            // Step 2: Process image
+            const { buffer, info } = await processWithSharp(inputBuffer, {
+                width,
+                height,
+                fit,
+                position,
+                format,
+                quality,
+                background,
+                stripMetadata,
+            });
 
-                // Step 3: Generate unique key for storage
-                const key = `image_${index}_${Date.now()}`;
+            // Step 3: Generate unique key for storage
+            const key = `image_${index}_${Date.now()}`;
 
-                // Step 4: Determine content type
-                const contentType = getContentType(info.format);
+            // Step 4: Determine content type
+            const contentType = getContentType(info.format);
 
-                // Step 5: Save to key-value store
-                await store.setValue(key, buffer, { contentType });
+            // Step 5: Save to key-value store
+            await store.setValue(key, buffer, { contentType });
 
-                // Step 6: Get public URL
-                const url = store.getPublicUrl(key);
+            // Step 6: Get public URL
+            const url = store.getPublicUrl(key);
 
-                // Step 7: Build result object
-                const result = {
-                    index,
-                    source,
-                    key,
-                    url,
-                    width: info.width,
-                    height: info.height,
-                    format: info.format,
-                    sizeBytes: buffer.length,
-                };
+            // Step 7: Build result object
+            const result = {
+                index,
+                source,
+                key,
+                url,
+                width: info.width,
+                height: info.height,
+                format: info.format,
+                sizeBytes: buffer.length,
+            };
 
-                // Step 8: Save result
-                results.push(result);
+            // Step 8: Save result
+            results.push(result);
 
-                // Step 9: Push to dataset if enabled
-                if (dataset) {
-                    await dataset.pushData(result);
-                }
-
-                succeeded++;
-                Apify.utils.log.info(`Successfully processed image ${index + 1}: ${url}`);
-            } catch (error) {
-                // Handle error for individual image
-                Apify.utils.log.exception(error, `Failed to process image ${index + 1}: ${source}`);
-
-                const errorResult = {
-                    index,
-                    source,
-                    error: error.message,
-                };
-
-                results.push(errorResult);
-
-                // Push error result to dataset if enabled
-                if (dataset) {
-                    await dataset.pushData(errorResult);
-                }
-
-                failed++;
+            // Step 9: Push to dataset if enabled
+            if (dataset) {
+                await dataset.pushData(result);
             }
-        },
-        tasksArray: images,
-    });
+
+            succeeded++;
+            log.info(`Successfully processed image ${index + 1}: ${url}`);
+        } catch (error) {
+            // Handle error for individual image
+            log.exception(error, `Failed to process image ${index + 1}: ${source}`);
+
+            const errorResult = {
+                index,
+                source,
+                error: error.message,
+            };
+
+            results.push(errorResult);
+
+            // Push error result to dataset if enabled
+            if (dataset) {
+                await dataset.pushData(errorResult);
+            }
+
+            failed++;
+        }
+    };
+
+    // Process images with concurrency control using Promise.all with chunking
+    const maxConcurrency = Math.min(Math.max(1, concurrency), 20);
+    for (let i = 0; i < images.length; i += maxConcurrency) {
+        const chunk = images.slice(i, i + maxConcurrency);
+        await Promise.all(chunk.map((source, j) => processImage(source, i + j)));
+    }
 
     // Compute summary
     const summary = {
@@ -316,7 +319,7 @@ Apify.main(async () => {
         failed,
     };
 
-    Apify.utils.log.info(`Processing complete: ${succeeded} succeeded, ${failed} failed out of ${images.length} total`);
+    log.info(`Processing complete: ${succeeded} succeeded, ${failed} failed out of ${images.length} total`);
 
     // Save final output to OUTPUT key
     const output = {
@@ -324,7 +327,7 @@ Apify.main(async () => {
         summary,
     };
 
-    await Apify.setValue('OUTPUT', output);
+    await Actor.setValue('OUTPUT', output);
 
-    Apify.utils.log.info('Results saved to OUTPUT key in key-value store');
+    log.info('Results saved to OUTPUT key in key-value store');
 });
