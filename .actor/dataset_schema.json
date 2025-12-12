@@ -1,57 +1,63 @@
 {
   "actorSpecification": 1,
-  "fields": {
-    "index": {
-      "title": "Index",
-      "type": "integer",
-      "description": "Index of the image in the input array"
-    },
-    "source": {
-      "title": "Source",
-      "type": "string",
-      "description": "Original input string (URL or key-value reference)"
-    },
-    "key": {
-      "title": "Key-Value Store Key",
-      "type": "string",
-      "description": "Key used to store the processed image in the key-value store",
-      "nullable": true
-    },
-    "url": {
-      "title": "Public URL",
-      "type": "string",
-      "description": "Public URL of the processed image",
-      "nullable": true
-    },
-    "width": {
-      "title": "Width",
-      "type": "integer",
-      "description": "Final width of the processed image in pixels",
-      "nullable": true
-    },
-    "height": {
-      "title": "Height",
-      "type": "integer",
-      "description": "Final height of the processed image in pixels",
-      "nullable": true
-    },
-    "format": {
-      "title": "Format",
-      "type": "string",
-      "description": "Final output format (jpeg, png, webp, avif, gif)",
-      "nullable": true
-    },
-    "sizeBytes": {
-      "title": "Size (Bytes)",
-      "type": "integer",
-      "description": "Size of the processed image in bytes",
-      "nullable": true
-    },
-    "error": {
-      "title": "Error",
-      "type": "string",
-      "description": "Error message if processing failed",
-      "nullable": true
+  "views": {
+    "overview": {
+      "title": "Image Processing Results",
+      "description": "Results of batch image processing",
+      "transformation": {
+        "fields": [
+          "index",
+          "source",
+          "key",
+          "url",
+          "width",
+          "height",
+          "format",
+          "sizeBytes",
+          "error"
+        ]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "index": {
+            "label": "Index",
+            "format": "number"
+          },
+          "source": {
+            "label": "Source",
+            "format": "text"
+          },
+          "key": {
+            "label": "Key",
+            "format": "text"
+          },
+          "url": {
+            "label": "Public URL",
+            "format": "link"
+          },
+          "width": {
+            "label": "Width",
+            "format": "number"
+          },
+          "height": {
+            "label": "Height",
+            "format": "number"
+          },
+          "format": {
+            "label": "Format",
+            "format": "text"
+          },
+          "sizeBytes": {
+            "label": "Size (Bytes)",
+            "format": "number"
+          },
+          "error": {
+            "label": "Error",
+            "format": "text"
+          }
+        }
+      }
     }
   }
 }
