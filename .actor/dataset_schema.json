@@ -1,60 +1,41 @@
 {
-  "title": "Image Processing Result",
-  "type": "object",
   "actorSpecification": 1,
-  "schemaVersion": 1,
-  "properties": {
+  "fields": {
     "index": {
-      "title": "Index",
       "type": "integer",
       "description": "Index of the image in the input array"
     },
     "source": {
-      "title": "Source",
       "type": "string",
       "description": "Original input string (URL or key-value reference)"
     },
     "key": {
-      "title": "Key-Value Store Key",
       "type": "string",
-      "description": "Key used to store the processed image in the key-value store",
-      "nullable": true
+      "description": "Key used to store the processed image in the key-value store"
     },
     "url": {
-      "title": "Public URL",
       "type": "string",
-      "description": "Public URL of the processed image",
-      "nullable": true
+      "description": "Public URL of the processed image"
     },
     "width": {
-      "title": "Width",
       "type": "integer",
-      "description": "Final width of the processed image in pixels",
-      "nullable": true
+      "description": "Final width of the processed image in pixels"
     },
     "height": {
-      "title": "Height",
       "type": "integer",
-      "description": "Final height of the processed image in pixels",
-      "nullable": true
+      "description": "Final height of the processed image in pixels"
     },
     "format": {
-      "title": "Format",
       "type": "string",
-      "description": "Final output format (jpeg, png, webp, avif, gif)",
-      "nullable": true
+      "description": "Final output format (jpeg, png, webp, avif, gif)"
     },
     "sizeBytes": {
-      "title": "Size (Bytes)",
       "type": "integer",
-      "description": "Size of the processed image in bytes",
-      "nullable": true
+      "description": "Size of the processed image in bytes"
     },
     "error": {
-      "title": "Error",
       "type": "string",
-      "description": "Error message if processing failed",
-      "nullable": true
+      "description": "Error message if processing failed"
     }
   }
 }
