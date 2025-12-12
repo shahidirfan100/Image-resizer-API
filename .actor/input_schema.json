@@ -13,9 +13,7 @@
       },
       "prefill": [
         "https://example.com/sample-image.jpg"
-      ],
-      "sectionCaption": "Image Sources",
-      "sectionDescription": "Provide URLs to images you want to process. You can also reference images stored in Apify key-value stores using the key-value:// format."
+      ]
     },
     "width": {
       "title": "Target Width",
@@ -24,9 +22,7 @@
       "editor": "number",
       "minimum": 1,
       "maximum": 10000,
-      "nullable": true,
-      "sectionCaption": "Image Dimensions",
-      "sectionDescription": "Configure the output size of your processed images."
+      "nullable": true
     },
     "height": {
       "title": "Target Height",
@@ -108,9 +104,7 @@
         "AVIF",
         "GIF",
         "Original"
-      ],
-      "sectionCaption": "Format & Quality",
-      "sectionDescription": "Configure the output format and compression settings."
+      ]
     },
     "quality": {
       "title": "Quality",
@@ -142,9 +136,7 @@
       "editor": "number",
       "default": 5,
       "minimum": 1,
-      "maximum": 20,
-      "sectionCaption": "Processing Options",
-      "sectionDescription": "Advanced processing configuration."
+      "maximum": 20
     },
     "outputStoreId": {
       "title": "Output Key-Value Store ID",
