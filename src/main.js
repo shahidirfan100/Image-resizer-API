@@ -183,7 +183,6 @@ Actor.main(async () => {
 
     // Destructure input with defaults
     const {
-        uploadedImages = [],
         images = [],
         width = null,
         height = null,
@@ -198,43 +197,12 @@ Actor.main(async () => {
         createDataset = true,
     } = input;
 
-    // Get the default key-value store for uploaded images
-    const defaultStore = await Actor.openKeyValueStore();
-
-    // Collect all image sources
-    const allImageSources = [];
-
-    // Process uploaded images from the default key-value store
-    // fileUpload editor returns array of file objects with properties like: { name, contentType }
-    // The file content is stored in the default key-value store with the name as the key
-    if (Array.isArray(uploadedImages) && uploadedImages.length > 0) {
-        log.info(`Found ${uploadedImages.length} uploaded images`);
-        for (const file of uploadedImages) {
-            // Handle both object format and string format
-            if (typeof file === 'object' && file !== null) {
-                const key = file.name || file.key || file;
-                allImageSources.push({ type: 'uploaded', key, source: `uploaded:${key}` });
-            } else if (typeof file === 'string') {
-                allImageSources.push({ type: 'uploaded', key: file, source: `uploaded:${file}` });
-            }
-        }
+    // Validate images array
+    if (!Array.isArray(images) || images.length === 0) {
+        throw new Error('Input field "images" must be a non-empty array of image sources (URLs or key-value:// references)');
     }
 
-    // Add URL sources
-    if (Array.isArray(images)) {
-        for (const url of images) {
-            if (url && typeof url === 'string') {
-                allImageSources.push({ type: 'url', source: url });
-            }
-        }
-    }
-
-    // Validate that we have at least one image to process
-    if (allImageSources.length === 0) {
-        throw new Error('No images provided. Please upload images or provide image URLs.');
-    }
-
-    log.info(`Starting image processing for ${allImageSources.length} images`);
+    log.info(`Starting image processing for ${images.length} images`);
     log.info(`Settings: width=${width}, height=${height}, fit=${fit}, format=${format}, quality=${quality}`);
 
     // Initialize storages
@@ -263,34 +231,14 @@ Actor.main(async () => {
     };
 
     // Process images with concurrency control
-    const processImage = async (imageSource, index) => {
-        const { type, source, key: uploadedKey } = imageSource;
+    const processImage = async (source, index) => {
         try {
-            log.info(`Processing image ${index + 1}/${allImageSources.length}: ${source}`);
+            log.info(`Processing image ${index + 1}/${images.length}: ${source}`);
 
-            let inputBuffer;
+            // Resolve image buffer from source (URL or key-value store reference)
+            const inputBuffer = await resolveImageBuffer(source, headerGenerator);
 
-            // Handle uploaded images from default key-value store
-            if (type === 'uploaded') {
-                const value = await defaultStore.getValue(uploadedKey);
-                if (!value) {
-                    throw new Error(`Uploaded image not found: ${uploadedKey}`);
-                }
-                if (Buffer.isBuffer(value)) {
-                    inputBuffer = value;
-                } else if (typeof value === 'string') {
-                    inputBuffer = Buffer.from(value, 'binary');
-                } else if (value instanceof ArrayBuffer) {
-                    inputBuffer = Buffer.from(value);
-                } else {
-                    throw new Error('Uploaded file is not a valid image buffer');
-                }
-            } else {
-                // Handle URL sources
-                inputBuffer = await resolveImageBuffer(source, headerGenerator);
-            }
-
-            // Step 2: Process image
+            // Process image with sharp
             const { buffer, info } = await processWithSharp(inputBuffer, {
                 width,
                 height,
@@ -302,19 +250,19 @@ Actor.main(async () => {
                 stripMetadata,
             });
 
-            // Step 3: Generate unique key for storage
+            // Generate unique key for storage
             const outputKey = `image_${index}_${Date.now()}`;
 
-            // Step 4: Determine content type
+            // Determine content type
             const contentType = getContentType(info.format);
 
-            // Step 5: Save to key-value store
+            // Save to key-value store
             await store.setValue(outputKey, buffer, { contentType });
 
-            // Step 6: Get public URL
+            // Get public URL
             const url = store.getPublicUrl(outputKey);
 
-            // Step 7: Build result object
+            // Build result object
             const result = {
                 index,
                 source,
@@ -326,10 +274,10 @@ Actor.main(async () => {
                 sizeBytes: buffer.length,
             };
 
-            // Step 8: Save result
+            // Save result
             results.push(result);
 
-            // Step 9: Push to dataset if enabled
+            // Push to dataset if enabled
             if (dataset) {
                 await dataset.pushData(result);
             }
@@ -359,19 +307,19 @@ Actor.main(async () => {
 
     // Process images with concurrency control using Promise.all with chunking
     const maxConcurrency = Math.min(Math.max(1, concurrency), 20);
-    for (let i = 0; i < allImageSources.length; i += maxConcurrency) {
-        const chunk = allImageSources.slice(i, i + maxConcurrency);
-        await Promise.all(chunk.map((imageSource, j) => processImage(imageSource, i + j)));
+    for (let i = 0; i < images.length; i += maxConcurrency) {
+        const chunk = images.slice(i, i + maxConcurrency);
+        await Promise.all(chunk.map((source, j) => processImage(source, i + j)));
     }
 
     // Compute summary
     const summary = {
-        total: allImageSources.length,
+        total: images.length,
         succeeded,
         failed,
     };
 
-    log.info(`Processing complete: ${succeeded} succeeded, ${failed} failed out of ${allImageSources.length} total`);
+    log.info(`Processing complete: ${succeeded} succeeded, ${failed} failed out of ${images.length} total`);
 
     // Save final output to OUTPUT key
     const output = {

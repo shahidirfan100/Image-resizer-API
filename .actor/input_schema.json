@@ -3,24 +3,19 @@
   "type": "object",
   "schemaVersion": 1,
   "properties": {
-    "uploadedImages": {
-      "title": "Upload Images",
-      "type": "array",
-      "description": "Upload images directly from your computer. Each uploaded file will be processed.",
-      "editor": "fileUpload",
-      "sectionCaption": "Direct Image Upload",
-      "sectionDescription": "Upload images directly from your device for processing."
-    },
     "images": {
-      "title": "Image URLs",
+      "title": "Image Sources",
       "type": "array",
       "description": "Array of image sources. Each can be an HTTP(S) URL or a key-value store reference in format: key-value://{storeId}/{key}",
       "editor": "stringList",
       "items": {
         "type": "string"
       },
-      "sectionCaption": "URL Sources",
-      "sectionDescription": "Alternatively, provide URLs to images you want to process."
+      "prefill": [
+        "https://example.com/sample-image.jpg"
+      ],
+      "sectionCaption": "Image Sources",
+      "sectionDescription": "Provide URLs to images you want to process. You can also reference images stored in Apify key-value stores using the key-value:// format."
     },
     "width": {
       "title": "Target Width",
@@ -166,5 +161,7 @@
       "default": true
     }
   },
-  "required": []
+  "required": [
+    "images"
+  ]
 }
